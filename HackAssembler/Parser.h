@@ -1,44 +1,29 @@
 #pragma once
+#include "Enums.h"
 #include <string>
 #include <fstream>
-#include <iostream>
-
-enum CommandType
-{
-	ACommand,
-	CCommand,
-	LCommand
-};
-
-
 
 class Parser
 {
-	
+
 public:
-	Parser(std::string);;
+	virtual void Advance() = 0;
+	virtual bool HasMoreCommands() = 0;
+	virtual CommandType TypeOfCommand() = 0;
 
-	void Advance();
-	bool HasMoreCommands();
-	CommandType CommandType();
-
-	std::string Symbol();
-	std::string Dest();
-	std::string Comp();
-	std::string Jump();
+	virtual std::string Symbol() = 0;
+	virtual std::string Dest() = 0;
+	virtual std::string Comp() = 0;
+	virtual std::string Jump() = 0;
 
 
-	
-	
-
-private:
+protected:
 	std::ifstream myAssemblyFile;
 	std::string line;
 
-
-	std::string& ltrim(std::string&, const char* t );
-	std::string& rtrim(std::string&, const char* t);
-	std::string& trim(std::string&, const char* t);
+	virtual std::string& ltrim(std::string&, const char* t ) = 0;
+	virtual std::string& rtrim(std::string&, const char* t) = 0;
+	virtual std::string& trim(std::string&, const char* t) = 0;
 
 
 };

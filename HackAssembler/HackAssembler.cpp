@@ -1,4 +1,5 @@
-#include "Parser.h"
+#include "HackParser.h"
+#include "Enums.h"
 #include <iostream>
 
 void NoFileError();
@@ -13,7 +14,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	
-	Parser parser(argv[1]);
+	HackParser parser(argv[1]);
 
 	parser.Advance();
 	parser.Advance();
