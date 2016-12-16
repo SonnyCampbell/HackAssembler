@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="HackParser.h" />
     <ClInclude Include="Parser.h" />

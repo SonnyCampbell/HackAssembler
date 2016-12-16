@@ -1,15 +1,18 @@
 #pragma once
 #include "Parser.h"
 #include "Enums.h"
+#include "Constants.h"
 #include <string>
 #include <fstream>
 #include <iostream>
+
+using std::string;
 
 class HackParser :
 	public Parser
 {
 public:
-	HackParser(std::string);
+	HackParser(string);
 	//~HackParser();
 
 	void Advance();
@@ -17,19 +20,38 @@ public:
 
 	CommandType TypeOfCommand();
 
-	std::string Symbol();
-	std::string Dest();
-	std::string Comp();
-	std::string Jump();
+	string Symbol();
+	string Dest();
+	string Comp();
+	string Jump();
 
 
 protected:
+	CommandType myCommandType;
 	std::ifstream myAssemblyFile;
-	std::string line;
+	
 
-	std::string& ltrim(std::string&, const char* t);
-	std::string& rtrim(std::string&, const char* t);
-	std::string& trim(std::string&, const char* t);
+	string& ltrim(string&, const char* t);
+	string& rtrim(string&, const char* t);
+	string& trim(string&, const char* t);
+
+
+private:
+	string currentLine;
+	string myAInstruction;
+	string myJumpInstruction;
+	string myDestInstruction;
+	string myCompInstruction;
+	string myLoopInstruction;
+
+	// TODO: Set to true for full enviroment
+	bool firstPass = false;
+
+	void GetNextLine();
+	void GetNextCommand();
+	void ParseLine();
+	void ParseLabels();
+	void ParseCInstruction();
 
 };
 

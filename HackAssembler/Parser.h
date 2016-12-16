@@ -19,7 +19,7 @@ public:
 
 protected:
 	std::ifstream myAssemblyFile;
-	std::string line;
+	std::string currentLine;
 
 	virtual std::string& ltrim(std::string&, const char* t ) = 0;
 	virtual std::string& rtrim(std::string&, const char* t) = 0;
