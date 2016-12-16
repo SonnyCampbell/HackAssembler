@@ -5,19 +5,21 @@
 void NoFileError();
 
 
-
 int main(int argc, char *argv[])
 {
 	if (argc == 1)
 	{
 		NoFileError();
-		return 0;
 	}
 	
+
 	HackParser parser(argv[1]);
 
 	parser.Advance();
 	parser.Advance();
+
+	std::cout << parser.Comp() << std::endl;
+
 	parser.Advance();
 	
 
@@ -28,6 +30,8 @@ int main(int argc, char *argv[])
 	std::cin >> n;
 	return 0;
 }
+
+
 
 
 void NoFileError()

@@ -1,6 +1,7 @@
 #pragma once
 #include "Parser.h"
 #include "Enums.h"
+#include "ExceptionHandler.h"
 #include "Constants.h"
 #include <string>
 #include <fstream>
@@ -52,6 +53,7 @@ private:
 	void ParseLine();
 	void ParseLabels();
 	void ParseCInstruction();
+
 
 };
 

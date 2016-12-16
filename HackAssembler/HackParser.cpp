@@ -41,18 +41,87 @@ CommandType HackParser::TypeOfCommand()
 
 string HackParser::Symbol()
 {
+	try
+	{
+		if (myCommandType = ACommand)
+		{
+			return myAInstruction;
+		}
+		else if (myCommandType = LCommand)
+		{
+			return myLoopInstruction;
+		}
+		else
+		{
+			throw ExceptionHandler();
+		}
+	}
+	catch (ExceptionHandler E)
+	{
+		E.IncompatibleInstructionError(CommndStrings[myCommandType], "Symbol");
+	}
+
 	return "";
+	
 }
 string HackParser::Dest()
 {
+	try
+	{
+		if (myCommandType = CCommand)
+		{
+			return myDestInstruction;
+		}
+		else
+		{
+			throw ExceptionHandler();
+		}
+	}
+	catch (ExceptionHandler E)
+	{
+		E.IncompatibleInstructionError(CommndStrings[myCommandType], "Dest");
+	}
+
 	return "";
 }
 string HackParser::Comp()
 {
+	try
+	{
+		if (myCommandType = CCommand)
+		{
+			return myCompInstruction;
+		}
+		else
+		{
+			throw ExceptionHandler();
+		}
+	}
+	catch (ExceptionHandler E)
+	{
+		E.IncompatibleInstructionError(CommndStrings[myCommandType], "Comp");
+	}
+
 	return "";
 }
 string HackParser::Jump()
 {
+	try
+	{
+		if (myCommandType = CCommand)
+		{
+			return myJumpInstruction;
+		}
+		else
+		{
+			throw ExceptionHandler();
+		}
+	}
+	catch (ExceptionHandler E)
+	{
+		E.IncompatibleInstructionError(CommndStrings[myCommandType], "Jump");
+	}
+
 	return "";
 
 }
@@ -123,12 +192,14 @@ void HackParser::GetNextCommand()
 	
 }
 
+// Parse the currently held line into its instructions
+// For now it simply chops off anything after the first instrction
 void HackParser::ParseLine()
 {
 	if (currentLine[0] == ACOMMAND)
 	{
-		size_t whitespace = currentLine.find_first_of(' ');
-		myAInstruction = currentLine.substr(1, whitespace-1);
+		size_t whitespace = currentLine.find_first_of(" \t\n\r\f\v");
+		myAInstruction = currentLine.substr(1, whitespace);
 		
 		myCommandType = ACommand;
 	}
@@ -140,6 +211,8 @@ void HackParser::ParseLine()
 
 }
 
+
+// Break C Instruction into its dest=comp;jump bits
 void HackParser::ParseCInstruction()
 {
 	size_t destBreak = currentLine.find_first_of("=");
@@ -155,12 +228,12 @@ void HackParser::ParseCInstruction()
 		myCompInstruction = currentLine.substr(0, compBreak);
 		currentLine.erase(0, compBreak + 1);
 
-		size_t whitespace = currentLine.find_first_of(' ');
+		size_t whitespace = currentLine.find_first_of(" \t\n\r\f\v");
 		myJumpInstruction = currentLine.substr(0, whitespace);		
 	}
 	else
 	{
-		size_t whitespace = currentLine.find_first_of(' ');
+		size_t whitespace = currentLine.find_first_of(" \t\n\r\f\v");
 		myCompInstruction = currentLine.substr(0, whitespace);
 	}
 
@@ -168,12 +241,15 @@ void HackParser::ParseCInstruction()
 	
 }
 
+
+// Parse Label instructions
 void HackParser::ParseLabels()
 {
 	if (currentLine[0] == LCOMMAND_OPEN)
 	{
 		size_t closePosition = currentLine.find_first_of(LCOMMAND_CLOSE);
-		myLoopInstruction = currentLine.substr(1, closePosition - 1);
+		myLoopInstruction = currentLine.substr(1, closePosition);
 		myCommandType = LCommand;
 	}
+	currentLine.erase(currentLine.begin(), currentLine.end());
 }
