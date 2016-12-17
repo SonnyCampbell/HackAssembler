@@ -25,6 +25,7 @@ public:
 	string Dest();
 	string Comp();
 	string Jump();
+	void Clear();
 
 
 protected:

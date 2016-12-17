@@ -2,9 +2,9 @@
 #include <string>
 #include <bitset>
 #include <map>
+#include "ExceptionHandler.h"
 
 using std::string;
-
 
 static std::map< string, string > JumpInstructions = {
 	{ ""   , "000" },
@@ -63,9 +63,20 @@ static std::map< string, string > CompInstructions = {
 string DestToBinary(string dest)
 {	
 	std::map< string, string >::iterator it = DestInstructions.find(dest);
-	if (it != DestInstructions.end())
+	try
+		{
+		if (it != DestInstructions.end())
+		{
+			return  DestInstructions.find(dest)->second;
+		}
+		else
+		{
+			throw ExceptionHandler();
+		}
+	}
+	catch (ExceptionHandler E)
 	{
-		return  DestInstructions.find(dest)->second;
+		E.BinaryInstructionNotFound(dest, "DestToBinary");
 	}
 	return "";
 	
@@ -74,9 +85,20 @@ string DestToBinary(string dest)
 string CompToBinary(string comp)
 {
 	std::map< string, string >::iterator it = CompInstructions.find(comp);
-	if (it != CompInstructions.end())
+	try
 	{
-		return  CompInstructions.find(comp)->second;
+		if (it != CompInstructions.end())
+		{
+			return  CompInstructions.find(comp)->second;
+		}
+		else
+		{
+			throw ExceptionHandler();
+		}
+	}
+	catch (ExceptionHandler E)
+	{
+		E.BinaryInstructionNotFound(comp, "CompToBinary");
 	}
 	return "";
 }
@@ -84,10 +106,27 @@ string CompToBinary(string comp)
 string JumpToBinary(string jump)
 {
 	std::map< string, string >::iterator it = JumpInstructions.find(jump);
-	if (it != JumpInstructions.end())
+	try
 	{
-		return  JumpInstructions.find(jump)->second;
+		if (it != JumpInstructions.end())
+		{
+			return  JumpInstructions.find(jump)->second;
+		}
+		else
+		{
+			throw ExceptionHandler();
+		}
 	}
+	catch (ExceptionHandler E)
+	{
+		E.BinaryInstructionNotFound(jump, "JumpToBinary");
+	}
+	
 	return "";
+}
+
+string DecimalAddressToBinary(string address)
+{
+	return std::bitset<15>(std::stoi(address)).to_string();
 }
 

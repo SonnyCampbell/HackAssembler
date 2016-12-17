@@ -13,3 +13,10 @@ const char *ExceptionHandler::IncompatibleInstructionError(std::string commandTy
 
 	return 0;
 }
+
+const char *ExceptionHandler::BinaryInstructionNotFound(std::string instruction, std::string functionName)
+{
+	std::cout << "Instruction [" << instruction << "] has no valid binary form. Called from " << functionName << "()" << std::endl;
+
+	return 0;
+}

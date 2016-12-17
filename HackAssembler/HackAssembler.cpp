@@ -1,30 +1,43 @@
 #include "HackParser.h"
+#include "MachineCodeTranlate.h"
 #include "Enums.h"
 #include <iostream>
+#include <fstream>
 
 void NoFileError();
 
 
 int main(int argc, char *argv[])
 {
-	if (argc == 1)
+	/*if (argc == 1)
 	{
 		NoFileError();
+	}*/
+	
+
+	HackParser parser("IOFiles/PongL.asm");
+	std::ofstream machineCodeFile;
+	machineCodeFile.open("PongL1.hack");
+
+	parser.Advance();
+	while (parser.HasMoreCommands())
+	{
+		
+		if (parser.TypeOfCommand() == CCommand)
+		{
+			machineCodeFile << "111" << CompToBinary(parser.Comp()) << DestToBinary(parser.Dest()) << JumpToBinary(parser.Jump()) << std::endl;
+		}
+		else if (parser.TypeOfCommand() == ACommand)
+		{
+			machineCodeFile << "0" << DecimalAddressToBinary( parser.Symbol() )<< std::endl;
+		}
+
+		parser.Clear();
+		parser.Advance();
 	}
-	
 
-	HackParser parser(argv[1]);
-
-	parser.Advance();
-	parser.Advance();
-
-	std::cout << parser.Comp() << std::endl;
-
-	parser.Advance();
-	
-
-	
-
+	machineCodeFile.close();
+	std::cout << "File written successfully." << std::endl;
 
 	int n;
 	std::cin >> n;

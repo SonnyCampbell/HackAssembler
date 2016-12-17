@@ -1,5 +1,7 @@
      
 
 // Comment Line
-@fsg 
-abd=123;abc
+@123 
+D=D+A;JMP
+D=D+A
+D+A;JMP

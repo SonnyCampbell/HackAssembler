@@ -43,11 +43,11 @@ string HackParser::Symbol()
 {
 	try
 	{
-		if (myCommandType = ACommand)
+		if (myCommandType == ACommand)
 		{
 			return myAInstruction;
 		}
-		else if (myCommandType = LCommand)
+		else if (myCommandType == LCommand)
 		{
 			return myLoopInstruction;
 		}
@@ -126,7 +126,14 @@ string HackParser::Jump()
 
 }
 
-
+void HackParser::Clear()
+{
+	myAInstruction = "";
+	myJumpInstruction = "";
+	myDestInstruction = "";
+	myCompInstruction = "";
+	myLoopInstruction = "";
+}
 
 
 // trim from left
@@ -165,19 +172,13 @@ void HackParser::GetNextCommand()
 {
 	GetNextLine();
 
-	while (currentLine.find_first_not_of(' ') == string::npos)
+	while (currentLine.find_first_not_of(' ') == string::npos || (currentLine[0] == '/' && currentLine[1] == '/') || (currentLine.empty()))
 	{
+		if (myAssemblyFile.eof())
+		{
+			return;
+		}
 		GetNextLine();
-	}
-
-	while (currentLine[0] == '/' && currentLine[1] == '/')
-	{
-		GetNextLine();
-	}
-
-	if (currentLine.empty())
-	{
-		return;
 	}
 
 	if (!firstPass)

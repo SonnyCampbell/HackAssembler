@@ -14,5 +14,7 @@ public:
 	//~ExceptionHandler();
 
 	const char *IncompatibleInstructionError(std::string, std::string);
+
+	const char *BinaryInstructionNotFound(std::string, std::string);
 };
 
