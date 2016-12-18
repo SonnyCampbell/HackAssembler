@@ -4,6 +4,40 @@
 HackParser::HackParser(string filename)
 {
 	myAssemblyFile.open(filename);
+	firstPass = true;
+	lineNumber = 0;
+	RAMSymbolNumber = 16;
+	InitialiseSymbolTable();
+}
+
+void HackParser::InitialiseSymbolTable()
+{
+	SymbolTable = {
+		{ "SP"  , "0" },
+		{ "LCL"  , "1" },
+		{ "ARG" , "2" },
+		{ "THIS"  , "3" },
+		{ "THAT"  , "4" },
+		{ "SCREEN" , "16384" },
+		{ "KBD" , "24576" },
+		{ "R0" , "0" },
+		{ "R1" , "1" },
+		{ "R2", "2" },
+		{ "R3", "3" },
+		{ "R4", "4" },
+		{ "R5", "5" },
+		{ "R6", "6" },
+		{ "R7", "7" },
+		{ "R8", "8" },
+		{ "R9", "9" },
+		{ "R10","10" },
+		{ "R11","11" },
+		{ "R12","12" },
+		{ "R13","13" },
+		{ "R14","14" },
+		{ "R15","15" }
+	};
+
 }
 
 
@@ -28,6 +62,16 @@ bool HackParser::HasMoreCommands()
 	if (!myAssemblyFile.eof())
 	{
 		return true;
+	}
+	else
+	{
+		if (firstPass)
+		{
+			myAssemblyFile.clear();
+			myAssemblyFile.seekg(0, std::ios::beg);
+			firstPass = false;
+			return true;
+		}
 	}
 	return false;
 
@@ -156,7 +200,9 @@ string& HackParser::trim(string& s, const char* t)
 	return ltrim(rtrim(s, t), t);
 }
 
-
+const bool HackParser::IsNumber(const string s) {
+	return s.find_first_not_of("0123456789") == string::npos;
+}
 
 
 void HackParser::GetNextLine()
@@ -172,13 +218,15 @@ void HackParser::GetNextCommand()
 {
 	GetNextLine();
 
-	while (currentLine.find_first_not_of(' ') == string::npos || (currentLine[0] == '/' && currentLine[1] == '/') || (currentLine.empty()))
+	while (currentLine.find_first_not_of(' ') == string::npos || (currentLine[0] == '/' && currentLine[1] == '/') ||
+				 (currentLine.empty()) || (!firstPass && currentLine[0] == '('))
 	{
 		if (myAssemblyFile.eof())
 		{
 			return;
 		}
 		GetNextLine();
+
 	}
 
 	if (!firstPass)
@@ -201,6 +249,21 @@ void HackParser::ParseLine()
 	{
 		size_t whitespace = currentLine.find_first_of(" \t\n\r\f\v");
 		myAInstruction = currentLine.substr(1, whitespace);
+
+		if (!IsNumber(myAInstruction))
+		{
+			std::unordered_map<string, string>::iterator it = SymbolTable.find(myAInstruction);
+			if (it == SymbolTable.end())
+			{
+				SymbolTable.insert(std::pair<string, string>(myAInstruction, std::to_string(RAMSymbolNumber)));
+				myAInstruction = std::to_string(RAMSymbolNumber);
+				RAMSymbolNumber++;
+			}
+			else
+			{
+				myAInstruction = it->second;
+			}
+		}
 		
 		myCommandType = ACommand;
 	}
@@ -249,8 +312,15 @@ void HackParser::ParseLabels()
 	if (currentLine[0] == LCOMMAND_OPEN)
 	{
 		size_t closePosition = currentLine.find_first_of(LCOMMAND_CLOSE);
-		myLoopInstruction = currentLine.substr(1, closePosition);
+		myLoopInstruction = currentLine.substr(1, closePosition-1);
 		myCommandType = LCommand;
+
+		// TODO: lineNumber + 1 will break if there is a comment or space between Label and next command
+		SymbolTable.insert(std::pair<string, string>(myLoopInstruction, std::to_string(lineNumber)));
+	}
+	else
+	{
+		lineNumber++;
 	}
 	currentLine.erase(currentLine.begin(), currentLine.end());
 }

@@ -30,7 +30,7 @@
     <ClInclude Include="ExceptionHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MachineCodeTranlate.h">
+    <ClInclude Include="MachineCodeTranslate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,7 +47,7 @@
     <ClCompile Include="ExceptionHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MachineCodeTranlate.cpp">
+    <ClCompile Include="MachineCodeTranslate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

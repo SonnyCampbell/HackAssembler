@@ -150,14 +150,14 @@
     <ClInclude Include="Enums.h" />
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="HackParser.h" />
-    <ClInclude Include="MachineCodeTranlate.h" />
+    <ClInclude Include="MachineCodeTranslate.h" />
     <ClInclude Include="Parser.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExceptionHandler.cpp" />
     <ClCompile Include="HackAssembler.cpp" />
     <ClCompile Include="HackParser.cpp" />
-    <ClCompile Include="MachineCodeTranlate.cpp" />
+    <ClCompile Include="MachineCodeTranslate.cpp" />
     <ClCompile Include="Parser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

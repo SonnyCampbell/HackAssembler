@@ -1,7 +1,23 @@
      
 
 // Comment Line
-@123 
+@symbol 
 D=D+A;JMP
 D=D+A
+(Test)
+D+A;JMP
+(Test2)
+D=A
+
+@symbol2
+A=D
+D=D+A
+@symbol3
+D+A;JMP
+
+@symbol2
+A=D
+@Test
+D=D+A
+@symbol3
 D+A;JMP

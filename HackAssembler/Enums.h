@@ -3,6 +3,7 @@
 
 typedef enum
 {
+	NoCommand,
 	ACommand,
 	CCommand,
 	LCommand

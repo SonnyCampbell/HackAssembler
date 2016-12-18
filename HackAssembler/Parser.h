@@ -15,6 +15,7 @@ public:
 	virtual std::string Dest() = 0;
 	virtual std::string Comp() = 0;
 	virtual std::string Jump() = 0;
+	virtual void Clear() = 0;
 
 
 protected:

@@ -1,5 +1,5 @@
 #include "HackParser.h"
-#include "MachineCodeTranlate.h"
+#include "MachineCodeTranslate.h"
 #include "Enums.h"
 #include <iostream>
 #include <fstream>
@@ -15,14 +15,14 @@ int main(int argc, char *argv[])
 	}*/
 	
 
-	HackParser parser("IOFiles/PongL.asm");
+	HackParser parser("Pong.asm");
 	std::ofstream machineCodeFile;
-	machineCodeFile.open("PongL1.hack");
+	machineCodeFile.open("Pong1.hack");
 
 	parser.Advance();
 	while (parser.HasMoreCommands())
 	{
-		
+		// TODO: Refactor out XXXXToBinary functions into the HackParser Class
 		if (parser.TypeOfCommand() == CCommand)
 		{
 			machineCodeFile << "111" << CompToBinary(parser.Comp()) << DestToBinary(parser.Dest()) << JumpToBinary(parser.Jump()) << std::endl;
