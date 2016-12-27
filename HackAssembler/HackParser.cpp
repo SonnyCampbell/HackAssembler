@@ -87,11 +87,11 @@ string HackParser::Symbol()
 {
 	try
 	{
-		if (myCommandType == ACommand)
+		if (myCommandType == ASM_ACommand)
 		{
 			return myAInstruction;
 		}
-		else if (myCommandType == LCommand)
+		else if (myCommandType == ASM_LCommand)
 		{
 			return myLoopInstruction;
 		}
@@ -112,7 +112,7 @@ string HackParser::Dest()
 {
 	try
 	{
-		if (myCommandType = CCommand)
+		if (myCommandType = ASM_CCommand)
 		{
 			return myDestInstruction;
 		}
@@ -132,7 +132,7 @@ string HackParser::Comp()
 {
 	try
 	{
-		if (myCommandType = CCommand)
+		if (myCommandType = ASM_CCommand)
 		{
 			return myCompInstruction;
 		}
@@ -152,7 +152,7 @@ string HackParser::Jump()
 {
 	try
 	{
-		if (myCommandType = CCommand)
+		if (myCommandType = ASM_CCommand)
 		{
 			return myJumpInstruction;
 		}
@@ -180,29 +180,9 @@ void HackParser::Clear()
 }
 
 
-// trim from left
-string& HackParser::ltrim(string& s, const char* t)
-{
-	s.erase(0, s.find_first_not_of(t));
-	return s;
-}
 
-// trim from right
-string& HackParser::rtrim(string& s, const char* t)
-{
-	s.erase(s.find_last_not_of(t) + 1);
-	return s;
-}
 
-// trim from left & right
-string& HackParser::trim(string& s, const char* t)
-{
-	return ltrim(rtrim(s, t), t);
-}
 
-const bool HackParser::IsNumber(const string s) {
-	return s.find_first_not_of("0123456789") == string::npos;
-}
 
 
 void HackParser::GetNextLine()
@@ -265,12 +245,12 @@ void HackParser::ParseLine()
 			}
 		}
 		
-		myCommandType = ACommand;
+		myCommandType = ASM_ACommand;
 	}
 	else
 	{
 		ParseCInstruction();
-		myCommandType = CCommand;
+		myCommandType = ASM_CCommand;
 	}
 
 }
@@ -313,7 +293,7 @@ void HackParser::ParseLabels()
 	{
 		size_t closePosition = currentLine.find_first_of(LCOMMAND_CLOSE);
 		myLoopInstruction = currentLine.substr(1, closePosition-1);
-		myCommandType = LCommand;
+		myCommandType = ASM_LCommand;
 
 		// TODO: lineNumber + 1 will break if there is a comment or space between Label and next command
 		SymbolTable.insert(std::pair<string, string>(myLoopInstruction, std::to_string(lineNumber)));
@@ -323,4 +303,17 @@ void HackParser::ParseLabels()
 		lineNumber++;
 	}
 	currentLine.erase(currentLine.begin(), currentLine.end());
+}
+
+
+void HackParser::WriteToFile(std::ofstream &machineCodeFile)
+{
+	if (TypeOfCommand() == ASM_CCommand)
+	{
+		machineCodeFile << "111" << CompToBinary(Comp()) << DestToBinary(Dest()) << JumpToBinary(Jump()) << std::endl;
+	}
+	else if (TypeOfCommand() == ASM_ACommand)
+	{
+		machineCodeFile << "0" << DecimalAddressToBinary(Symbol()) << std::endl;
+	}
 }

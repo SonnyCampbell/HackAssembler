@@ -33,6 +33,9 @@
     <ClInclude Include="MachineCodeTranslate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="VMParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Parser.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MachineCodeTranslate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VMParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

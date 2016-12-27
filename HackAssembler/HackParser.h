@@ -19,30 +19,24 @@ public:
 
 	void Advance();
 	bool HasMoreCommands();
-
+	void Clear();
 	CommandType TypeOfCommand();
+	void WriteToFile(std::ofstream&);
+
+	
+
+
+private:
+	CommandType myCommandType;
+	std::ifstream myAssemblyFile;
 
 	string Symbol();
 	string Dest();
 	string Comp();
 	string Jump();
-	void Clear();
-
 	void InitialiseSymbolTable();
 
 
-protected:
-	CommandType myCommandType;
-	std::ifstream myAssemblyFile;
-	
-
-	string& ltrim(string&, const char* t);
-	string& rtrim(string&, const char* t);
-	string& trim(string&, const char* t);
-	const bool IsNumber(const string s);
-
-
-private:
 	string currentLine;
 	string myAInstruction;
 	string myJumpInstruction;

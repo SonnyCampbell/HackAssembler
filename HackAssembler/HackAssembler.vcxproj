@@ -152,6 +152,7 @@
     <ClInclude Include="HackParser.h" />
     <ClInclude Include="MachineCodeTranslate.h" />
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="VMParser.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExceptionHandler.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="HackParser.cpp" />
     <ClCompile Include="MachineCodeTranslate.cpp" />
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="VMParser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

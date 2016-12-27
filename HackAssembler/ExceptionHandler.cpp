@@ -20,3 +20,9 @@ const char *ExceptionHandler::BinaryInstructionNotFound(std::string instruction,
 
 	return 0;
 }
+
+const char * ExceptionHandler::InvalidVMArgumentSpecified(std::string arg)
+{
+	std::cout << "Argument: " << arg << " is an invalid Argument 1 value." << std::endl;
+	return 0;
+}

@@ -1,10 +1,13 @@
 #include "HackParser.h"
+#include "VMParser.h"
 #include "MachineCodeTranslate.h"
 #include "Enums.h"
 #include <iostream>
 #include <fstream>
 
 void NoFileError();
+void WriteFile(Parser*);
+Parser* SelectParser(std::string);
 
 
 int main(int argc, char *argv[])
@@ -14,30 +17,21 @@ int main(int argc, char *argv[])
 		NoFileError();
 	}*/
 	
+	// TODO: supply filename at runtime
+	// TODO: generate required parser type at runtime
+	string filename = "BasicTest.vm";
+	Parser *parser;
 
-	HackParser parser("Pong.asm");
-	std::ofstream machineCodeFile;
-	machineCodeFile.open("Pong1.hack");
-
-	parser.Advance();
-	while (parser.HasMoreCommands())
+	if (filename.find(".vm") != filename.npos)
 	{
-		// TODO: Refactor out XXXXToBinary functions into the HackParser Class
-		if (parser.TypeOfCommand() == CCommand)
-		{
-			machineCodeFile << "111" << CompToBinary(parser.Comp()) << DestToBinary(parser.Dest()) << JumpToBinary(parser.Jump()) << std::endl;
-		}
-		else if (parser.TypeOfCommand() == ACommand)
-		{
-			machineCodeFile << "0" << DecimalAddressToBinary( parser.Symbol() )<< std::endl;
-		}
-
-		parser.Clear();
-		parser.Advance();
+		parser = new VMParser(filename);
 	}
+	else
+	{
+		parser = new HackParser(filename);
+	}		 
 
-	machineCodeFile.close();
-	std::cout << "File written successfully." << std::endl;
+	WriteFile(parser);
 
 	int n;
 	std::cin >> n;
@@ -45,6 +39,43 @@ int main(int argc, char *argv[])
 }
 
 
+
+
+void WriteFile(Parser *parser)
+{
+	//HackParser parser("Pong.asm");
+
+	std::ofstream outputFile; // TODO: change name of myAssemblyFile and machineCodeFile to more generic file
+	outputFile.open("BasicTest.asm"); // TODO: supply filename at runtime
+
+	parser->Advance();
+	while (parser->HasMoreCommands())
+	{
+
+		parser->WriteToFile(outputFile);
+
+		parser->Clear();
+		parser->Advance();
+	}
+
+	outputFile.close();
+	std::cout << "File written successfully." << std::endl;
+}
+
+Parser* SelectParser(std::string filename)
+{
+	
+	if (filename.find(".vm") != filename.npos)
+	{
+		VMParser vmParser(filename);
+		return &vmParser;
+	}
+	else
+	{
+		VMParser vmParser(filename);
+		return &vmParser;
+	}
+}
 
 
 void NoFileError()

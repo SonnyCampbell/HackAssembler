@@ -16,5 +16,7 @@ public:
 	const char *IncompatibleInstructionError(std::string, std::string);
 
 	const char *BinaryInstructionNotFound(std::string, std::string);
+
+	const char *InvalidVMArgumentSpecified(std::string);
 };
 
