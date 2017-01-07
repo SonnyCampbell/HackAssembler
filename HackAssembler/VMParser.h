@@ -34,5 +34,7 @@ private:
 	std::string arg2;
 	std::string inputFileName;
 
+	int jumpCount = 0;
+
 };
 

@@ -91,12 +91,31 @@ void VMParser::ParseLine()
 		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
 		arg2 = currentLine.substr(0, whitespace);
 		// TODO: Use another method of splitting the string by whitespace into tokens and setting values to tokens
-	}
-	else if (currentCommand == C_ADD)
-		myCommandType = CommandType::VM_ADD;
+	}	
+	else if (currentCommand == C_IFGOTO || currentCommand == C_GOTO || currentCommand == C_LABEL)
+	{
+		if(currentCommand == C_IFGOTO)
+			myCommandType = CommandType::VM_IFGOTO;
+		else if(currentCommand == C_GOTO)
+			myCommandType = CommandType::VM_GOTO;
+		else if(currentCommand == C_LABEL)
+			myCommandType = CommandType::VM_LABEL;
 
-	else if (currentCommand == C_SUB)
-		myCommandType = CommandType::VM_SUB;
+		currentLine.erase(currentLine.begin(), currentLine.begin() + whitespace);
+		currentLine = trim(currentLine, " \t\n\r\f\v");
+		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
+		arg2 = currentLine.substr(0, whitespace);
+	}
+	else if (VM_ArithemticCommands.find(currentCommand) != VM_ArithemticCommands.end())
+		myCommandType = VM_ArithemticCommands[currentCommand];
+
+	else
+	{
+		std::cout << "Error command: " << currentCommand << std::endl;
+		// TODO: Handle error case
+	}
+		
+
 
 }
 
@@ -111,6 +130,11 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 			targetFile << "@" << 5 + std::stoi(arg2) << std::endl;
 			targetFile << "D=M" << std::endl;
 		}
+		else if (arg1 == "pointer")
+		{
+			targetFile << "@" << 3 + std::stoi(arg2) << std::endl;
+			targetFile << "D=M" << std::endl;
+		}
 		else
 		{
 			targetFile << "@" << arg2 << std::endl;
@@ -119,7 +143,7 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 			if (arg1 != "constant")
 			{
 				if (arg1 == "static")
-					targetFile << "@" << inputFileName << "." << arg1 << std::endl;
+					targetFile << "@" << inputFileName << "." << arg2 << std::endl;
 				else
 					targetFile << "@" << arg1 << std::endl;
 
@@ -150,13 +174,23 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 			targetFile << "@" << 5 + std::stoi(arg2) << std::endl;
 			targetFile << "M=D" << std::endl;
 		}
+		else if (arg1 == "pointer")
+		{
+			targetFile << "@SP" << std::endl;
+			targetFile << "M=M-1" << std::endl;
+			targetFile << "A=M" << std::endl;
+			targetFile << "D=M" << std::endl;
+
+			targetFile << "@" << 3 + std::stoi(arg2) << std::endl;
+			targetFile << "M=D" << std::endl;
+		}
 		else
 		{
 			targetFile << "@" << arg2 << std::endl;
 			targetFile << "D=A" << std::endl;
 
 			if (arg1 == "static")
-				targetFile << "@" << inputFileName << "." << arg1 << std::endl;
+				targetFile << "@" << inputFileName << "." << arg2 << std::endl;
 			else
 				targetFile << "@" << arg1 << std::endl;
 
@@ -174,19 +208,107 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 			targetFile << "M=D" << std::endl;
 		}		
 	}
-	else if (TypeOfCommand() == CommandType::VM_ADD || TypeOfCommand() == CommandType::VM_SUB)
+	else if (TypeOfCommand() == CommandType::VM_LABEL)
+	{
+		targetFile << "(" << arg2 << ")" << std::endl;
+	}
+	else if (TypeOfCommand() == CommandType::VM_IFGOTO)
 	{
 		targetFile << "@SP" << std::endl;
 		targetFile << "M=M-1" << std::endl;
 		targetFile << "A=M" << std::endl;
 		targetFile << "D=M" << std::endl;
+		targetFile << "@" << arg2 << std::endl;
+		targetFile << "D;JNE" << std::endl;
+	}
+	else if (TypeOfCommand() == CommandType::VM_GOTO)
+	{
+		targetFile << "@" << arg2 << std::endl;
+		targetFile << "0;JMP" << std::endl;
+	}
+	else
+	{
 		targetFile << "@SP" << std::endl;
 		targetFile << "M=M-1" << std::endl;
 		targetFile << "A=M" << std::endl;
-		if (TypeOfCommand() == CommandType::VM_ADD)
+		targetFile << "D=M" << std::endl;
+
+		if (TypeOfCommand() != CommandType::VM_NEG && TypeOfCommand() != CommandType::VM_NOT)
+		{
+			targetFile << "@SP" << std::endl;
+			targetFile << "M=M-1" << std::endl;
+			targetFile << "A=M" << std::endl;
+		}
+		
+
+		switch (TypeOfCommand())
+		{
+		case CommandType::VM_ADD:
 			targetFile << "M=M+D" << std::endl;
-		else if (TypeOfCommand() == CommandType::VM_SUB)
+			break;
+		case CommandType::VM_SUB:
 			targetFile << "M=M-D" << std::endl;
+			break;
+		case CommandType::VM_NEG:
+			targetFile << "M=-M" << std::endl;
+			break;
+		case CommandType::VM_NOT:
+			targetFile << "M=!M" << std::endl;
+			break;
+
+		default:
+
+			switch (TypeOfCommand())
+			{
+			case CommandType::VM_EQ:
+				targetFile << "D=M-D" << std::endl;
+				targetFile << "@TRUE" << jumpCount << std::endl;
+				targetFile << "D;JEQ" << std::endl;
+				break;
+
+			case CommandType::VM_GT:
+				targetFile << "D=M-D" << std::endl;
+				targetFile << "@TRUE" << jumpCount << std::endl;
+				targetFile << "D;JGT" << std::endl;
+				break;
+
+			case CommandType::VM_LT:
+				targetFile << "D=M-D" << std::endl;
+				targetFile << "@TRUE" << jumpCount << std::endl;
+				targetFile << "D;JLT" << std::endl;
+				break;
+
+			case CommandType::VM_AND:
+				targetFile << "M=D&M" << std::endl;
+				targetFile << "@CONT" << jumpCount << std::endl;
+				targetFile << "0;JMP" << std::endl;
+				break;
+
+			case CommandType::VM_OR:
+				targetFile << "M=D|M" << std::endl;
+				targetFile << "@CONT" << jumpCount << std::endl;
+				targetFile << "0;JMP" << std::endl;
+				break;
+
+			default:
+				break;
+			}
+
+			targetFile << "@SP" << std::endl;
+			targetFile << "A=M" << std::endl;
+			targetFile << "M=0" << std::endl;
+			targetFile << "@CONT" << jumpCount << std::endl;
+			targetFile << "0;JMP" << std::endl;
+			targetFile << "(TRUE" << jumpCount << ")" << std::endl;
+			targetFile << "@SP" << std::endl;
+			targetFile << "A=M" << std::endl;
+			targetFile << "M=-1" << std::endl;
+			targetFile << "(CONT" << jumpCount << ")" << std::endl;
+			jumpCount++;
+			break;
+
+		}
+
 
 		targetFile << "@SP" << std::endl;
 		targetFile << "M=M+1" << std::endl;

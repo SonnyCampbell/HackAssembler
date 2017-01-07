@@ -18,8 +18,7 @@ int main(int argc, char *argv[])
 	}*/
 	
 	// TODO: supply filename at runtime
-	// TODO: generate required parser type at runtime
-	string filename = "BasicTest.vm";
+	string filename = "FibonacciSeries.vm";
 	Parser *parser;
 
 	if (filename.find(".vm") != filename.npos)
@@ -46,7 +45,7 @@ void WriteFile(Parser *parser)
 	//HackParser parser("Pong.asm");
 
 	std::ofstream outputFile; // TODO: change name of myAssemblyFile and machineCodeFile to more generic file
-	outputFile.open("BasicTest.asm"); // TODO: supply filename at runtime
+	outputFile.open("FibonacciSeries.asm"); // TODO: supply filename at runtime
 
 	parser->Advance();
 	while (parser->HasMoreCommands())
@@ -72,8 +71,8 @@ Parser* SelectParser(std::string filename)
 	}
 	else
 	{
-		VMParser vmParser(filename);
-		return &vmParser;
+		HackParser hackParser(filename);
+		return &hackParser;
 	}
 }
 

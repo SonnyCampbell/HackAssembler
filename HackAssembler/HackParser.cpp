@@ -102,7 +102,7 @@ string HackParser::Symbol()
 	}
 	catch (ExceptionHandler E)
 	{
-		E.IncompatibleInstructionError(CommndStrings[myCommandType], "Symbol");
+		E.IncompatibleInstructionError(ASM_CommndStrings[myCommandType], "Symbol");
 	}
 
 	return "";
@@ -123,7 +123,7 @@ string HackParser::Dest()
 	}
 	catch (ExceptionHandler E)
 	{
-		E.IncompatibleInstructionError(CommndStrings[myCommandType], "Dest");
+		E.IncompatibleInstructionError(ASM_CommndStrings[myCommandType], "Dest");
 	}
 
 	return "";
@@ -143,7 +143,7 @@ string HackParser::Comp()
 	}
 	catch (ExceptionHandler E)
 	{
-		E.IncompatibleInstructionError(CommndStrings[myCommandType], "Comp");
+		E.IncompatibleInstructionError(ASM_CommndStrings[myCommandType], "Comp");
 	}
 
 	return "";
@@ -163,7 +163,7 @@ string HackParser::Jump()
 	}
 	catch (ExceptionHandler E)
 	{
-		E.IncompatibleInstructionError(CommndStrings[myCommandType], "Jump");
+		E.IncompatibleInstructionError(ASM_CommndStrings[myCommandType], "Jump");
 	}
 
 	return "";
