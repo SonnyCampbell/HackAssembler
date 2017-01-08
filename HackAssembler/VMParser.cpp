@@ -84,7 +84,7 @@ void VMParser::ParseLine()
 		currentLine.erase(currentLine.begin(), currentLine.begin() + whitespace);
 		currentLine = trim(currentLine, " \t\n\r\f\v");
 		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
-		SetArgument1(currentLine.substr(0, whitespace));
+		SetRegisterArgument(currentLine.substr(0, whitespace));
 
 		currentLine.erase(currentLine.begin(), currentLine.begin() + whitespace);
 		currentLine = trim(currentLine, " \t\n\r\f\v");
@@ -104,7 +104,25 @@ void VMParser::ParseLine()
 		currentLine.erase(currentLine.begin(), currentLine.begin() + whitespace);
 		currentLine = trim(currentLine, " \t\n\r\f\v");
 		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
+		label = currentLine.substr(0, whitespace);
+	}
+	else if (currentCommand == C_FUNCTION)
+	{
+		myCommandType = CommandType::VM_FUNCTION;
+
+		currentLine.erase(currentLine.begin(), currentLine.begin() + whitespace);
+		currentLine = trim(currentLine, " \t\n\r\f\v");
+		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
+		label = currentLine.substr(0, whitespace);
+
+		currentLine.erase(currentLine.begin(), currentLine.begin() + whitespace);
+		currentLine = trim(currentLine, " \t\n\r\f\v");
+		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
 		arg2 = currentLine.substr(0, whitespace);
+	}
+	else if (currentCommand == C_RETURN)
+	{
+		myCommandType = CommandType::VM_RETURN;
 	}
 	else if (VM_ArithemticCommands.find(currentCommand) != VM_ArithemticCommands.end())
 		myCommandType = VM_ArithemticCommands[currentCommand];
@@ -125,12 +143,12 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 {
 	if (TypeOfCommand() == CommandType::VM_PUSH)
 	{
-		if (arg1 == "temp")
+		if (registerArg == "temp")
 		{
 			targetFile << "@" << 5 + std::stoi(arg2) << std::endl;
 			targetFile << "D=M" << std::endl;
 		}
-		else if (arg1 == "pointer")
+		else if (registerArg == "pointer")
 		{
 			targetFile << "@" << 3 + std::stoi(arg2) << std::endl;
 			targetFile << "D=M" << std::endl;
@@ -140,12 +158,12 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 			targetFile << "@" << arg2 << std::endl;
 			targetFile << "D=A" << std::endl;
 
-			if (arg1 != "constant")
+			if (registerArg != "constant")
 			{
-				if (arg1 == "static")
+				if (registerArg == "static")
 					targetFile << "@" << inputFileName << "." << arg2 << std::endl;
 				else
-					targetFile << "@" << arg1 << std::endl;
+					targetFile << "@" << registerArg << std::endl;
 
 				targetFile << "A=M+D" << std::endl;
 				targetFile << "D=M" << std::endl;				
@@ -164,7 +182,7 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 	}
 	else if (TypeOfCommand() == CommandType::VM_POP)
 	{
-		if (arg1 == "temp")
+		if (registerArg == "temp")
 		{
 			targetFile << "@SP" << std::endl;
 			targetFile << "M=M-1" << std::endl;
@@ -174,7 +192,7 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 			targetFile << "@" << 5 + std::stoi(arg2) << std::endl;
 			targetFile << "M=D" << std::endl;
 		}
-		else if (arg1 == "pointer")
+		else if (registerArg == "pointer")
 		{
 			targetFile << "@SP" << std::endl;
 			targetFile << "M=M-1" << std::endl;
@@ -189,10 +207,10 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 			targetFile << "@" << arg2 << std::endl;
 			targetFile << "D=A" << std::endl;
 
-			if (arg1 == "static")
+			if (registerArg == "static")
 				targetFile << "@" << inputFileName << "." << arg2 << std::endl;
 			else
-				targetFile << "@" << arg1 << std::endl;
+				targetFile << "@" << registerArg << std::endl;
 
 			targetFile << "D=M+D" << std::endl;
 			targetFile << "@R13" << std::endl;
@@ -210,7 +228,7 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 	}
 	else if (TypeOfCommand() == CommandType::VM_LABEL)
 	{
-		targetFile << "(" << arg2 << ")" << std::endl;
+		targetFile << "(" << label << ")" << std::endl;
 	}
 	else if (TypeOfCommand() == CommandType::VM_IFGOTO)
 	{
@@ -218,13 +236,96 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 		targetFile << "M=M-1" << std::endl;
 		targetFile << "A=M" << std::endl;
 		targetFile << "D=M" << std::endl;
-		targetFile << "@" << arg2 << std::endl;
+		targetFile << "@" << label << std::endl;
 		targetFile << "D;JNE" << std::endl;
 	}
 	else if (TypeOfCommand() == CommandType::VM_GOTO)
 	{
-		targetFile << "@" << arg2 << std::endl;
+		targetFile << "@" << label << std::endl;
 		targetFile << "0;JMP" << std::endl;
+	}
+	else if (TypeOfCommand() == CommandType::VM_FUNCTION)
+	{
+		for (int i = 0; i < std::stoi(arg2); i++)
+		{
+			targetFile << "@0" << std::endl;
+			targetFile << "D=A" << std::endl;
+			targetFile << "@SP" << std::endl;
+			targetFile << "A=M" << std::endl;
+			targetFile << "M=D" << std::endl;
+
+			targetFile << "@SP" << std::endl;
+			targetFile << "M=M+1" << std::endl;
+		}
+		
+	}
+	else if (TypeOfCommand() == CommandType::VM_RETURN)
+	{
+		targetFile << "@LCL" << std::endl;
+		targetFile << "D=M" << std::endl;
+
+		targetFile << "@FRAME" << std::endl;
+		targetFile << "M=D" << std::endl; // FRAME = LCL
+
+		targetFile << "@5" << std::endl;
+		targetFile << "D=D-A" << std::endl;
+		targetFile << "A=D" << std::endl;
+		targetFile << "D=M" << std::endl;
+		targetFile << "@RET" << std::endl;
+		targetFile << "M=D" << std::endl; // RET = *(FRAME - 5)
+
+		targetFile << "@SP" << std::endl;
+		targetFile << "M=M-1" << std::endl;
+		targetFile << "A=M" << std::endl;
+		targetFile << "D=M" << std::endl;
+		
+		targetFile << "@ARG" << std::endl;
+		targetFile << "A=M" << std::endl;
+		targetFile << "M=D" << std::endl;
+		targetFile << "@ARG" << std::endl;
+		targetFile << "D=M" << std::endl; // ARG = pop()
+		targetFile << "@SP" << std::endl;
+		targetFile << "M=D+1" << std::endl; //SP = ARG + 1
+
+		targetFile << "@FRAME" << std::endl;
+		targetFile << "D=M" << std::endl;
+
+		targetFile << "A=D-1" << std::endl;
+		targetFile << "D=M" << std::endl;
+		targetFile << "@THAT" << std::endl;
+		targetFile << "M=D" << std::endl; // THAT = *(FRAME - 1) 
+
+		targetFile << "@FRAME" << std::endl;
+		targetFile << "D=M" << std::endl;
+		targetFile << "@2" << std::endl;
+		targetFile << "A=D-A" << std::endl;
+
+		targetFile << "D=M" << std::endl;
+		targetFile << "@THIS" << std::endl;
+		targetFile << "M=D" << std::endl;// THIS = *(FRAME - 2)  
+	
+		targetFile << "@FRAME" << std::endl;
+		targetFile << "D=M" << std::endl;
+		targetFile << "@3" << std::endl;
+		targetFile << "A=D-A" << std::endl;
+
+		targetFile << "D=M" << std::endl;
+		targetFile << "@ARG" << std::endl;
+		targetFile << "M=D" << std::endl; // ARG = *(FRAME - 3) 
+
+		targetFile << "@FRAME" << std::endl;
+		targetFile << "D=M" << std::endl;
+		targetFile << "@4" << std::endl;
+		targetFile << "A=D-A" << std::endl;
+
+		targetFile << "D=M" << std::endl;
+		targetFile << "@LCL" << std::endl;
+		targetFile << "M=D" << std::endl; // LCL = *(FRAME - 4) 
+		
+		targetFile << "@RET" << std::endl;
+		targetFile << "A=M" << std::endl;
+		targetFile << "0;JMP" << std::endl;
+		
 	}
 	else
 	{
@@ -325,7 +426,7 @@ CommandType VMParser::TypeOfCommand()
 	return myCommandType;
 }
 
-void VMParser::SetArgument1(std::string arg)
+void VMParser::SetRegisterArgument(std::string arg)
 {
 	try
 	{
@@ -335,7 +436,7 @@ void VMParser::SetArgument1(std::string arg)
 		}
 		else
 		{
-			arg1 = RegisterStrings[arg];
+			registerArg = RegisterStrings[arg];
 		}
 	}
 	catch (ExceptionHandler E)

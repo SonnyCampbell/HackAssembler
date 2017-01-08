@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	}*/
 	
 	// TODO: supply filename at runtime
-	string filename = "FibonacciSeries.vm";
+	string filename = "SimpleFunction.vm";
 	Parser *parser;
 
 	if (filename.find(".vm") != filename.npos)
@@ -45,18 +45,16 @@ void WriteFile(Parser *parser)
 	//HackParser parser("Pong.asm");
 
 	std::ofstream outputFile; // TODO: change name of myAssemblyFile and machineCodeFile to more generic file
-	outputFile.open("FibonacciSeries.asm"); // TODO: supply filename at runtime
+	outputFile.open("SimpleFunction.asm"); // TODO: supply filename at runtime
 
 	parser->Advance();
 	while (parser->HasMoreCommands())
 	{
 
 		parser->WriteToFile(outputFile);
-
-		parser->Clear();
-		parser->Advance();
-	}
-
+		parser->Clear();	
+		parser->Advance(); 
+	} 
 	outputFile.close();
 	std::cout << "File written successfully." << std::endl;
 }
@@ -64,8 +62,8 @@ void WriteFile(Parser *parser)
 Parser* SelectParser(std::string filename)
 {
 	
-	if (filename.find(".vm") != filename.npos)
-	{
+	if (filename.find(".vm") != filename.npos) 
+	{ 
 		VMParser vmParser(filename);
 		return &vmParser;
 	}

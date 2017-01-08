@@ -28,9 +28,11 @@ private:
 	void GetNextLine();
 	void GetNextCommand();
 	void ParseLine();
-	void SetArgument1(std::string);
+	void SetRegisterArgument(std::string);
 
-	std::string arg1;
+	std::string registerArg;
+	std::string label;
+
 	std::string arg2;
 	std::string inputFileName;
 
