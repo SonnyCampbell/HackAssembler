@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "Enums.h"
 #include "ExceptionHandler.h"
+#include <stack>
 #include <iostream>
 
 using std::string;
@@ -17,6 +18,7 @@ public:
 	void Advance();
 	bool HasMoreCommands();
 	void WriteToFile(std::ofstream&);
+	void WriteInit(std::ofstream&);
 	void Clear();
 	CommandType TypeOfCommand();
 
@@ -32,6 +34,7 @@ private:
 
 	std::string registerArg;
 	std::string label;
+	std::stack<std::string> functionName;
 
 	std::string arg2;
 	std::string inputFileName;

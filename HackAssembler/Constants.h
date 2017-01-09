@@ -20,5 +20,7 @@ const std::string C_IFGOTO = "if-goto";
 const std::string C_GOTO = "goto";
 const std::string C_FUNCTION = "function";
 const std::string C_RETURN = "return";
+const std::string C_CALL = "call";
+
 
 

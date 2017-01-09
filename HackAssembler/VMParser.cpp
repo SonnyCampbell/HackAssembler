@@ -5,8 +5,9 @@ VMParser::VMParser(string filename)
 
 	myAssemblyFile.open(filename);
 
-	size_t fileExt = filename.find_first_of(".");
-	inputFileName = filename.substr(0, fileExt);
+	size_t fileExt = filename.find_last_of(".");
+	size_t lastSlash = filename.find_last_of("/");
+	inputFileName = filename.substr(lastSlash + 1, fileExt - lastSlash - 1);
 }
 
 
@@ -119,11 +120,30 @@ void VMParser::ParseLine()
 		currentLine = trim(currentLine, " \t\n\r\f\v");
 		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
 		arg2 = currentLine.substr(0, whitespace);
+	
+		//functionName.pop();
+		functionName.push(label);
 	}
 	else if (currentCommand == C_RETURN)
 	{
 		myCommandType = CommandType::VM_RETURN;
+
 	}
+	else if (currentCommand == C_CALL)
+	{
+		myCommandType = CommandType::VM_CALL;
+
+		currentLine.erase(currentLine.begin(), currentLine.begin() + whitespace);
+		currentLine = trim(currentLine, " \t\n\r\f\v");
+		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
+		label = currentLine.substr(0, whitespace);
+
+		currentLine.erase(currentLine.begin(), currentLine.begin() + whitespace);
+		currentLine = trim(currentLine, " \t\n\r\f\v");
+		whitespace = currentLine.find_first_of(" \t\n\r\f\v");
+		arg2 = currentLine.substr(0, whitespace);
+	}
+
 	else if (VM_ArithemticCommands.find(currentCommand) != VM_ArithemticCommands.end())
 		myCommandType = VM_ArithemticCommands[currentCommand];
 
@@ -137,7 +157,82 @@ void VMParser::ParseLine()
 
 }
 
+void VMParser::WriteInit(std::ofstream &targetFile)
+{
+	targetFile << "@256" << std::endl;
+	targetFile << "D=A" << std::endl;
+	targetFile << "@SP" << std::endl;
+	targetFile << "M=D" << std::endl;
 
+
+	targetFile << "@Sys.init_return" << std::endl;
+
+
+	targetFile << "D=A" << std::endl;
+	targetFile << "@SP" << std::endl;
+	targetFile << "A=M" << std::endl;
+	targetFile << "M=D" << std::endl;
+
+	targetFile << "@SP" << std::endl;
+	targetFile << "M=M+1" << std::endl;
+
+	targetFile << "@LCL" << std::endl; // push LCL
+	targetFile << "D=M" << std::endl;
+	targetFile << "@SP" << std::endl;
+	targetFile << "A=M" << std::endl;
+	targetFile << "M=D" << std::endl;
+
+	targetFile << "@SP" << std::endl;
+	targetFile << "M=M+1" << std::endl;
+
+	targetFile << "@ARG" << std::endl; // push ARG
+	targetFile << "D=M" << std::endl;
+	targetFile << "@SP" << std::endl;
+	targetFile << "A=M" << std::endl;
+	targetFile << "M=D" << std::endl;
+
+	targetFile << "@SP" << std::endl;
+	targetFile << "M=M+1" << std::endl;
+
+	targetFile << "@THIS" << std::endl; // push THIS
+	targetFile << "D=M" << std::endl;
+	targetFile << "@SP" << std::endl;
+	targetFile << "A=M" << std::endl;
+	targetFile << "M=D" << std::endl;
+
+	targetFile << "@SP" << std::endl;
+	targetFile << "M=M+1" << std::endl;
+
+	targetFile << "@THAT" << std::endl;// push THAT
+	targetFile << "D=M" << std::endl;
+	targetFile << "@SP" << std::endl;
+	targetFile << "A=M" << std::endl;
+	targetFile << "M=D" << std::endl;
+
+	targetFile << "@SP" << std::endl;
+	targetFile << "M=M+1" << std::endl;
+
+	targetFile << "@0" << std::endl;// ARG = SP-n-5
+	targetFile << "D=A" << std::endl;
+	targetFile << "@5" << std::endl;
+	targetFile << "D=D+A" << std::endl;
+
+	targetFile << "@SP" << std::endl;
+	targetFile << "D=M-D" << std::endl;
+	targetFile << "@ARG" << std::endl;
+	targetFile << "M=D" << std::endl;
+
+	targetFile << "@SP" << std::endl; // LCL = SP
+	targetFile << "D=M" << std::endl;
+	targetFile << "@LCL" << std::endl;
+	targetFile << "M=D" << std::endl;
+
+	targetFile << "@Sys.init" << std::endl;
+	targetFile << "0;JMP" << std::endl;
+
+	targetFile << "(Sys.init_return)" << std::endl;
+
+}
 
 void VMParser::WriteToFile(std::ofstream &targetFile)
 {
@@ -228,7 +323,7 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 	}
 	else if (TypeOfCommand() == CommandType::VM_LABEL)
 	{
-		targetFile << "(" << label << ")" << std::endl;
+		targetFile << "(" << functionName.top() << "$" << label << ")" << std::endl;
 	}
 	else if (TypeOfCommand() == CommandType::VM_IFGOTO)
 	{
@@ -236,16 +331,18 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 		targetFile << "M=M-1" << std::endl;
 		targetFile << "A=M" << std::endl;
 		targetFile << "D=M" << std::endl;
-		targetFile << "@" << label << std::endl;
+		targetFile << "@" << functionName.top() << "$" << label << std::endl;
 		targetFile << "D;JNE" << std::endl;
 	}
 	else if (TypeOfCommand() == CommandType::VM_GOTO)
 	{
-		targetFile << "@" << label << std::endl;
+		targetFile << "@" << functionName.top() << "$" << label << std::endl;
 		targetFile << "0;JMP" << std::endl;
 	}
 	else if (TypeOfCommand() == CommandType::VM_FUNCTION)
 	{
+		targetFile << "(" << label << ")" << std::endl;
+
 		for (int i = 0; i < std::stoi(arg2); i++)
 		{
 			targetFile << "@0" << std::endl;
@@ -326,6 +423,79 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 		targetFile << "A=M" << std::endl;
 		targetFile << "0;JMP" << std::endl;
 		
+	}
+	else if (TypeOfCommand() == VM_CALL)
+	{
+		//push return address
+
+		targetFile << "@" << functionName.top() << "$" << label << "_return" << jumpCount << std::endl;
+
+		
+		targetFile << "D=A" << std::endl;
+		targetFile << "@SP" << std::endl;
+		targetFile << "A=M" << std::endl;
+		targetFile << "M=D" << std::endl;
+
+		targetFile << "@SP" << std::endl;
+		targetFile << "M=M+1" << std::endl;
+
+		targetFile << "@LCL" << std::endl; // push LCL
+		targetFile << "D=M" << std::endl;
+		targetFile << "@SP" << std::endl;
+		targetFile << "A=M" << std::endl;
+		targetFile << "M=D" << std::endl;
+
+		targetFile << "@SP" << std::endl;
+		targetFile << "M=M+1" << std::endl;
+		
+		targetFile << "@ARG" << std::endl; // push ARG
+		targetFile << "D=M" << std::endl;
+		targetFile << "@SP" << std::endl;
+		targetFile << "A=M" << std::endl;
+		targetFile << "M=D" << std::endl;
+
+		targetFile << "@SP" << std::endl;
+		targetFile << "M=M+1" << std::endl;	
+		
+		targetFile << "@THIS" << std::endl; // push THIS
+		targetFile << "D=M" << std::endl;
+		targetFile << "@SP" << std::endl;
+		targetFile << "A=M" << std::endl;
+		targetFile << "M=D" << std::endl;
+
+		targetFile << "@SP" << std::endl;
+		targetFile << "M=M+1" << std::endl;
+	
+		targetFile << "@THAT" << std::endl;// push THAT
+		targetFile << "D=M" << std::endl;
+		targetFile << "@SP" << std::endl;
+		targetFile << "A=M" << std::endl;
+		targetFile << "M=D" << std::endl;
+
+		targetFile << "@SP" << std::endl;
+		targetFile << "M=M+1" << std::endl;
+		
+		targetFile << "@" << arg2 << std::endl;// ARG = SP-n-5
+		targetFile << "D=A" << std::endl;
+		targetFile << "@5" << std::endl;
+		targetFile << "D=D+A" << std::endl;
+
+		targetFile << "@SP" << std::endl;
+		targetFile << "D=M-D" << std::endl;		
+		targetFile << "@ARG" << std::endl;
+		targetFile << "M=D" << std::endl;
+
+		targetFile << "@SP" << std::endl; // LCL = SP
+		targetFile << "D=M" << std::endl;
+		targetFile << "@LCL" << std::endl;
+		targetFile << "M=D" << std::endl;
+		
+		targetFile << "@" << label << std::endl;
+		targetFile << "0;JMP" << std::endl;
+
+		targetFile << "(" << functionName.top() << "$" << label << "_return" << jumpCount << ")" << std::endl;
+		jumpCount++;
+
 	}
 	else
 	{

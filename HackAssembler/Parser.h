@@ -17,7 +17,7 @@ public:
 	//virtual std::string Jump() = 0;
 	virtual void Clear() = 0;
 	virtual void WriteToFile(std::ofstream&) = 0;
-
+	virtual void WriteInit(std::ofstream&) = 0;
 
 protected:
 	std::ifstream myAssemblyFile;

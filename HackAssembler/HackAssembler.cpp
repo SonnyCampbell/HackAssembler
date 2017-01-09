@@ -2,35 +2,79 @@
 #include "VMParser.h"
 #include "MachineCodeTranslate.h"
 #include "Enums.h"
+#include <windows.h>
+#include <vector>
 #include <iostream>
 #include <fstream>
 
 void NoFileError();
-void WriteFile(Parser*);
+void WriteFile(Parser*, std::ofstream&);
 Parser* SelectParser(std::string);
+std::wstring string_to_wstring(const std::string&);
 
 
 int main(int argc, char *argv[])
 {
 	/*if (argc == 1)
+
 	{
 		NoFileError();
 	}*/
 	
 	// TODO: supply filename at runtime
-	string filename = "SimpleFunction.vm";
-	Parser *parser;
 
-	if (filename.find(".vm") != filename.npos)
+	std::vector<std::wstring> files;
+	
+	std::string search_path = "../../../projects/08/FunctionCalls/StaticsTest/*.vm";
+	WIN32_FIND_DATA fd;
+	HANDLE hFind = ::FindFirstFile(string_to_wstring(search_path).c_str(), &fd);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			// read all (real) files in current folder
+			// , delete '!' read other 2 default folder . and ..
+			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				files.push_back(fd.cFileName);
+			}
+		} while (::FindNextFile(hFind, &fd));
+		::FindClose(hFind);
+	}
+
+	std::ofstream outputFile;
+	 // TODO: change name of myAssemblyFile and machineCodeFile to more generic file
+	outputFile.open("StaticsTest.asm", std::ios_base::app); // TODO: supply filename at runtime
+
+	Parser *parser;	
+	
+	std::vector<std::wstring>::iterator it;
+	it = std::find(files.begin(), files.end(), string_to_wstring("Sys.vm").c_str());
+
+	if (it != files.end())
+	{
+		parser = new VMParser("../../../projects/08/FunctionCalls/StaticsTest/Sys.vm");
+		files.erase(it);
+		parser->WriteInit(outputFile);
+		WriteFile(parser, outputFile);
+	}
+
+	for (auto file : files)
+	{
+		std::string f(file.begin(), file.end());
+		parser = new VMParser("../../../projects/08/FunctionCalls/StaticsTest/" + f);
+		WriteFile(parser, outputFile);
+	}
+
+	outputFile.close();
+
+	/*if (filename.find(".vm") != filename.npos)
 	{
 		parser = new VMParser(filename);
 	}
 	else
 	{
 		parser = new HackParser(filename);
-	}		 
+	}*/		 
 
-	WriteFile(parser);
+	
 
 	int n;
 	std::cin >> n;
@@ -38,14 +82,12 @@ int main(int argc, char *argv[])
 }
 
 
+std::wstring string_to_wstring(const std::string& str) {
+	return std::wstring(str.begin(), str.end());
+}
 
-
-void WriteFile(Parser *parser)
+void WriteFile(Parser *parser, std::ofstream& outputFile)
 {
-	//HackParser parser("Pong.asm");
-
-	std::ofstream outputFile; // TODO: change name of myAssemblyFile and machineCodeFile to more generic file
-	outputFile.open("SimpleFunction.asm"); // TODO: supply filename at runtime
 
 	parser->Advance();
 	while (parser->HasMoreCommands())
@@ -55,7 +97,7 @@ void WriteFile(Parser *parser)
 		parser->Clear();	
 		parser->Advance(); 
 	} 
-	outputFile.close();
+	
 	std::cout << "File written successfully." << std::endl;
 }
 

@@ -22,6 +22,7 @@ public:
 	void Clear();
 	CommandType TypeOfCommand();
 	void WriteToFile(std::ofstream&);
+	void WriteInit(std::ofstream&);
 
 	
 

@@ -317,3 +317,7 @@ void HackParser::WriteToFile(std::ofstream &machineCodeFile)
 		machineCodeFile << "0" << DecimalAddressToBinary(Symbol()) << std::endl;
 	}
 }
+
+void HackParser::WriteInit(std::ofstream &)
+{
+}
