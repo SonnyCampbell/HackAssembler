@@ -307,10 +307,8 @@ A=M
 M=D
 @SP
 M=M+1
-@0
-D=A
 @Class1.0
-D=M+D
+D=A
 @R13
 M=D
 @SP
@@ -330,10 +328,8 @@ A=M
 M=D
 @SP
 M=M+1
-@1
-D=A
 @Class1.1
-D=M+D
+D=A
 @R13
 M=D
 @SP
@@ -405,7 +401,6 @@ A=M
 @0
 D=A
 @Class1.0
-A=M+D
 D=M
 @SP
 A=M
@@ -415,7 +410,6 @@ M=M+1
 @1
 D=A
 @Class1.1
-A=M+D
 D=M
 @SP
 A=M
@@ -494,10 +488,8 @@ A=M
 M=D
 @SP
 M=M+1
-@0
-D=A
 @Class2.0
-D=M+D
+D=A
 @R13
 M=D
 @SP
@@ -517,10 +509,8 @@ A=M
 M=D
 @SP
 M=M+1
-@1
-D=A
 @Class2.1
-D=M+D
+D=A
 @R13
 M=D
 @SP
@@ -592,7 +582,6 @@ A=M
 @0
 D=A
 @Class2.0
-A=M+D
 D=M
 @SP
 A=M
@@ -602,7 +591,6 @@ M=M+1
 @1
 D=A
 @Class2.1
-A=M+D
 D=M
 @SP
 A=M

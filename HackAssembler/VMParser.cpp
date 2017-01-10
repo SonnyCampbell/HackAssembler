@@ -258,9 +258,10 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 				if (registerArg == "static")
 					targetFile << "@" << inputFileName << "." << arg2 << std::endl;
 				else
+				{
 					targetFile << "@" << registerArg << std::endl;
-
-				targetFile << "A=M+D" << std::endl;
+					targetFile << "A=M+D" << std::endl;
+				}
 				targetFile << "D=M" << std::endl;				
 			}
 		}
@@ -299,15 +300,20 @@ void VMParser::WriteToFile(std::ofstream &targetFile)
 		}
 		else
 		{
-			targetFile << "@" << arg2 << std::endl;
-			targetFile << "D=A" << std::endl;
 
 			if (registerArg == "static")
+			{
 				targetFile << "@" << inputFileName << "." << arg2 << std::endl;
+				targetFile << "D=A" << std::endl;
+			}
 			else
+			{
+				targetFile << "@" << arg2 << std::endl;
+				targetFile << "D=A" << std::endl;
 				targetFile << "@" << registerArg << std::endl;
+				targetFile << "D=M+D" << std::endl;
+			}
 
-			targetFile << "D=M+D" << std::endl;
 			targetFile << "@R13" << std::endl;
 			targetFile << "M=D" << std::endl;
 
